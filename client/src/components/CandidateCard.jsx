@@ -34,8 +34,8 @@ export default function CandidateCard() {
 
       const url =
         searchType === "enrollment"
-          ? "http://localhost:4500/api/search"
-          : "http://localhost:4500/api/search-name";
+          ? "https://rahman-mujibur.onrender.com/api/search"
+          : "https://rahman-mujibur.onrender.com/api/search-name";
 
       const params =
         searchType === "enrollment"
