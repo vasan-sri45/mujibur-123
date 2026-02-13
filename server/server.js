@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
 
   app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://mujibur-123.onrender.com",
     methods: ["GET", "POST"],
     credentials: true,
   })
