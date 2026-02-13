@@ -3,8 +3,6 @@ import axios from "axios";
 import mujibImg from "../assets/mujib1.jpeg";
 import { Search } from "lucide-react";
 
-/* ================= MAIN COMPONENT ================= */
-
 export default function CandidateCard() {
   const [searchType, setSearchType] = useState("enrollment");
   const [value, setValue] = useState("");
@@ -14,14 +12,15 @@ export default function CandidateCard() {
   const [emptyError, setEmptyError] = useState("");
 
   const handleSearch = async () => {
-    // ✅ EMPTY INPUT HANDLING
     if (!value.trim()) {
       setCandidates([]);
       setError("");
       setEmptyError(
         searchType === "enrollment"
           ? "Please enter Enrollment Number"
-          : "Please enter Name"
+          : searchType === "name"
+          ? "Please enter Name"
+          : "Please enter AWF Number"
       );
       return;
     }
@@ -32,15 +31,19 @@ export default function CandidateCard() {
       setEmptyError("");
       setCandidates([]);
 
-      const url =
-        searchType === "enrollment"
-          ? "https://rahman-mujibur.onrender.com/api/search"
-          : "https://rahman-mujibur.onrender.com/api/search-name";
+      let url = "";
+      let params = {};
 
-      const params =
-        searchType === "enrollment"
-          ? { enrollment_no: value }
-          : { name: value };
+      if (searchType === "enrollment") {
+        url = "https://rahman-mujibur.onrender.com/api/search";
+        params = { enrollment_no: value };
+      } else if (searchType === "name") {
+        url = "https://rahman-mujibur.onrender.com/api/search-name";
+        params = { name: value };
+      } else if (searchType === "awf") {
+        url = "https://rahman-mujibur.onrender.com/api/awf-search";
+        params = { enrollment_no: value };
+      }
 
       const res = await axios.get(url, { params });
 
@@ -51,7 +54,7 @@ export default function CandidateCard() {
       } else {
         setError("No record found");
       }
-    } catch {
+    } catch (err) {
       setError("No record found");
     } finally {
       setLoading(false);
@@ -60,13 +63,11 @@ export default function CandidateCard() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-
-      {/* ================= LEFT : BACKGROUND IMAGE ================= */}
+      {/* LEFT IMAGE */}
       <div
         className="relative w-full lg:w-1/2 min-h-screen bg-cover bg-center flex items-center"
         style={{ backgroundImage: `url(${mujibImg})` }}
       >
-        {/* MOBILE CARD */}
         <div className="lg:hidden w-full flex justify-center mt-[185px]">
           <CardContent
             {...{
@@ -84,7 +85,7 @@ export default function CandidateCard() {
         </div>
       </div>
 
-      {/* ================= RIGHT : CARD ================= */}
+      {/* RIGHT CARD */}
       <div className="hidden lg:flex lg:w-1/2 min-h-screen bg-white items-center justify-center">
         <CardContent
           {...{
@@ -104,8 +105,6 @@ export default function CandidateCard() {
   );
 }
 
-/* ================= CARD ================= */
-
 function CardContent({
   searchType,
   setSearchType,
@@ -119,11 +118,9 @@ function CardContent({
 }) {
   return (
     <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6">
-
-      {/* TYPING NAME */}
       <TypingText text="M. MUJIBUR RAHMAN" />
 
-      <p className="text-center text-sm text-gray-700 mt-2 font-anton font-normal tracking-wide">
+      <p className="text-center text-sm text-gray-700 mt-2 font-semibold">
         Contesting in the Tamilnadu & Puducherry
         <br />
         Bar Council Election - 2026
@@ -131,7 +128,7 @@ function CardContent({
 
       {/* RADIO */}
       <div className="mt-5 space-y-3 text-sm">
-        <label className="flex gap-2 items-center font-poppins font-semibold">
+        <label className="flex gap-2 items-center font-semibold">
           <input
             type="radio"
             checked={searchType === "enrollment"}
@@ -140,7 +137,7 @@ function CardContent({
           Search by Enrolment No
         </label>
 
-        <label className="flex gap-2 items-center font-poppins font-semibold">
+        <label className="flex gap-2 items-center font-semibold">
           <input
             type="radio"
             checked={searchType === "name"}
@@ -148,9 +145,18 @@ function CardContent({
           />
           Search by Name
         </label>
+
+        <label className="flex gap-2 items-center font-semibold">
+          <input
+            type="radio"
+            checked={searchType === "awf"}
+            onChange={() => setSearchType("awf")}
+          />
+          Search by AWF
+        </label>
       </div>
 
-      {/* SEARCH */}
+      {/* SEARCH INPUT */}
       <div className="mt-4 flex gap-2">
         <input
           value={value}
@@ -158,37 +164,38 @@ function CardContent({
           placeholder={
             searchType === "enrollment"
               ? "Enter Enrollment No"
-              : "Enter Name"
+              : searchType === "name"
+              ? "Enter Name"
+              : "Enter AWF No"
           }
-          className="flex-1 border rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 font-lato font-bold tracking-wider"
+          className="flex-1 border rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleSearch}
           disabled={!value.trim()}
-          className="bg-blue-700 text-white px-4 py-2 rounded-xl
-                     disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-blue-700 text-white px-4 py-2 rounded-xl disabled:opacity-50"
         >
           <Search size={18} />
         </button>
       </div>
 
-      {/* EMPTY INPUT MESSAGE CARD */}
+      {/* EMPTY MESSAGE */}
       {emptyError && (
-        <div className="mt-4 bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-xl p-3 text-sm font-poppins font-semibold">
+        <div className="mt-4 bg-yellow-50 border border-yellow-300 text-yellow-800 rounded-xl p-3 text-sm">
           {emptyError}
         </div>
       )}
 
       {/* LOADING */}
       {loading && (
-        <p className="text-center text-sm mt-3 text-gray-500 font-poppins font-semibold">
+        <p className="text-center text-sm mt-3 text-gray-500">
           Searching...
         </p>
       )}
 
-      {/* API ERROR */}
+      {/* ERROR */}
       {error && (
-        <div className="mt-4 bg-red-50 border border-red-300 text-red-700 rounded-xl p-3 text-sm font-poppins font-semibold">
+        <div className="mt-4 bg-red-50 border border-red-300 text-red-700 rounded-xl p-3 text-sm">
           {error}
         </div>
       )}
@@ -199,12 +206,12 @@ function CardContent({
           {candidates.map((c) => (
             <div
               key={c._id}
-              className="bg-gray-50 border rounded-xl p-3 font-lato font-bold tracking-wider text-sm"
+              className="bg-gray-50 border rounded-xl p-3 text-sm"
             >
-              <p><b className="font-poppins font-bold text-md">Name:</b> {c.name}</p>
-              <p><b className="font-poppins font-bold text-md">Enrollment:</b> {c.enrollment_no}</p>
-              <p><b className="font-poppins font-bold text-md">Gender:</b> {c.gender}</p>
-              <p><b className="font-poppins font-bold text-md">Address:</b> {c.address}</p>
+              <p><b>Name:</b> {c.name}</p>
+              <p><b>Enrollment:</b> {c.enrollment_no}</p>
+              <p><b>Gender:</b> {c.gender}</p>
+              <p><b>Address:</b> {c.address}</p>
             </div>
           ))}
         </div>
@@ -213,9 +220,7 @@ function CardContent({
   );
 }
 
-/* ================= TYPING EFFECT ================= */
-
-function TypingText({ text, speed = 200, pause = 1200 }) {
+function TypingText({ text, speed = 120, pause = 1200 }) {
   const [displayed, setDisplayed] = useState("");
   const [index, setIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
@@ -239,9 +244,11 @@ function TypingText({ text, speed = 200, pause = 1200 }) {
   }, [index, deleting, text, speed, pause]);
 
   return (
-    <h2 className="text-center text-blue-700 text-xl lg:text-2xl font-anton font-semibold tracking-wider">
+    <h2 className="text-center text-blue-700 text-xl lg:text-2xl font-semibold">
       {displayed}
-      <span className="ml-1 animate-pulse font-medium">|</span>
+      <span className="ml-1 animate-pulse">|</span>
     </h2>
   );
 }
+
+
